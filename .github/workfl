@@ -1,20 +1,18 @@
 # GitHub Actions Workflow for a React Application
-# This workflow builds and tests the application across multiple Node.js versions.
+# This workflow builds and tests the application across multiple Node.js versions using pnpm.
 
-name: React CI
+name: React CI with pnpm
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push events but only for the main/master branch
-  push:
-    branches: [ main, master ]
-  # Triggers the workflow on pull request events targeting the main/master branch
-  pull_request:
-    branches: [ main, master ]
+  push: # Triggers the workflow on push events for all branches
+    branches-ignore: [] # Ensure it runs for all branches, remove if you want to restrict
+  pull_request: # Triggers the workflow on pull request events for all branches
+    branches-ignore: [] # Ensure it runs for all branches, remove if you want to restrict
 
 jobs:
   build_and_test:
-    # The type of runner that the job will run on
+    # The type of runner that the job will run on (GitHub-hosted Linux environment)
     runs-on: ubuntu-latest
 
     strategy:
@@ -25,7 +23,7 @@ jobs:
         # You can add other matrix variables here if needed, e.g., different operating systems
         # os: [ubuntu-latest, windows-latest]
 
-    name: Build & Test on Node ${{ matrix.node-version }} # Dynamically set the job name
+    name: Build & Test on Node ${{ matrix.node-version }} with pnpm # Dynamically set the job name
 
     steps:
       # Step 1: Check out the repository code
@@ -33,49 +31,50 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # Uses the official checkout action
 
-      # Step 2: Set up Node.js
+      # Step 2: Set up pnpm
+      # This action installs pnpm to be used in subsequent steps.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8 # Specify pnpm version if needed, or let it use the latest stable
+
+      # Step 3: Set up Node.js
       # This action sets up a Node.js environment for use in actions.
       # It will use the Node.js version specified in the matrix.
+      # It will also cache pnpm dependencies.
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm' # Or 'yarn' if you use Yarn. This caches dependencies for faster builds.
+          cache: 'pnpm' # Enable caching for pnpm
 
-      # Step 3: Install dependencies
-      # This command installs the project dependencies.
-      # 'npm ci' is generally recommended for CI environments as it's faster and more reliable
-      # for reproducing builds than 'npm install'. It requires a package-lock.json or npm-shrinkwrap.json.
-      # If you use Yarn, replace this with 'yarn install --frozen-lockfile'.
+      # Step 4: Install dependencies with pnpm
+      # This command installs the project dependencies using pnpm.
+      # 'pnpm install --frozen-lockfile' is recommended for CI to ensure reproducible builds.
+      # It requires a pnpm-lock.yaml file.
       - name: Install dependencies
-        run: npm ci
-        # Or for Yarn:
-        # run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
-      # Step 4: Build the React application
+      # Step 5: Build the React application with pnpm
       # This command compiles the React application for production.
       # The specific command might vary based on your project setup (e.g., create-react-app, Next.js, Vite).
       - name: Build application
-        run: npm run build
-        # Or for Yarn:
-        # run: yarn build
+        run: pnpm run build
         env:
           CI: true # Often used by build scripts to adjust behavior for CI environments
 
-      # Step 5: Run tests
+      # Step 6: Run tests with pnpm
       # This command executes the test suite for your application.
       # The specific command might vary.
       - name: Run tests
-        run: npm test
-        # Or for Yarn:
-        # run: yarn test
+        run: pnpm test
         env:
           CI: true # Ensures tests run in CI mode (e.g., not watching for changes)
 
-      # Optional Step 6: Upload build artifacts (if needed)
+      # Optional Step 7: Upload build artifacts (if needed)
       # If you need to inspect the build output or use it in a later deployment job.
       # - name: Upload build artifact
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: build-output-${{ matrix.node-version }} # Unique name for artifact from each Node version
-      #     path: build/ # Or your project's build output directory
+      #     name: build-output-node-${{ matrix.node-version }} # Unique name for artifact from each Node version
+      #     path: build/ # Or your project's build output directory (e.g., dist/)
