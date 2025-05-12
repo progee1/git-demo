@@ -1,4 +1,4 @@
-name: react CI
+name: React CI Workflow
 
 on:
   push:
@@ -17,14 +17,16 @@ jobs:
        
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: install npm
+        run: npm install -g npm
 
       - name: Install dependencies
         run: npm install
