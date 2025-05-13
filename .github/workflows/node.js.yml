@@ -15,11 +15,13 @@ jobs:
         node-version: [16.x, 18.x, 20.x]
         os: [ubuntu-latest]
         
-    runs-on: ${{ matrix-ox }}
+    runs-on: ${{ matrix.os }}
+
+       # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v4
+      
+      - uses: actions/checkout@v4
       - name: Use Node. js $< matrix. node-version y
         uses: actions/setup-node@v4
         with:
