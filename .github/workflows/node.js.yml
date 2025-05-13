@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x, 24.x]
+        node-version: [16.x, 18.x, 20.x]
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v4
@@ -24,15 +24,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        run: pnpm install
-        "lodash@^4.17.20":
-  version: "4.17.21"
-  resolved: "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
-  integrity: "sha512-..."
-  dependencies:
-    "clone@^1.0.0": # Simplified nested dependency
-      version: "1.0.4"
-
+        run: npm install
+       
       - name: Build
         run: npm run build
 
